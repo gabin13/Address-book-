@@ -1,0 +1,241 @@
+body {
+    background-color: #2c3e50;
+}
+
+.mode-sombre {
+    background-color: #333;
+    color: #fff;
+}
+
+body.mode-sombre {
+    background-color: #333; /* Fond sombre */
+    color: #fff; /* Texte en couleur claire */
+}
+
+
+.custom-container {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+.btn-custom {
+    border: 2px solid transparent;
+    border-radius: 6px;
+}
+
+.btn-custom:hover {
+    border-color: #6c757d;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    width: 300px;
+    margin-right: 10px;
+}
+
+.dropdown-item {
+    color: black;
+    text-decoration: none;
+}
+
+.dropdown-item:hover {
+    text-decoration: none;
+}
+
+.dropdown-toggle {
+    color: black;
+    text-decoration: none;
+}
+
+.dropdown-toggle:hover {
+    text-decoration: none;
+}
+
+.center-title {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 35%;
+}
+
+.btn-three-dots {
+    font-size: 1.5em;
+    color: black;
+}
+
+.dropdown-menu {
+    min-width: 10rem;
+    right: 0; /* Aligner le menu sur la droite */
+}
+
+.mode-sombre .list-group-item {
+    background-color: #333; /* Fond sombre */
+    color: #fff; /* Texte en couleur claire */
+    border-color: #fff;
+}
+
+.mode-sombre .custom-container {
+    background-color: #333;
+    color: #fff;
+    border-color: #fff;
+}
+
+.mode-sombre .btn-custom {
+    border-color: #fff;
+    color: #fff;
+}
+
+.mode-sombre .card {
+    background-color: #333;
+    color: #fff;
+    border-color: #fff;
+}
+
+.mode-sombre .card-body {
+    background-color: #333;
+}
+
+.mode-sombre .card-title {
+    color: #fff;
+}
+
+.mode-sombre .rounded.bg-secondary.text-white {
+    background-color: #555;
+    color: #fff;
+}
+
+
+.mode-sombre .dropdown-menu-right {
+    background-color: #333;
+    border-color: #fff;
+    color: #fff;
+}
+
+.mode-sombre .dropdown-menu-right a.dropdown-item {
+    color: #fff;
+}
+
+.mode-sombre .dropdown-menu-right .dropdown-item:hover {
+    color: inherit;
+    background-color: transparent;
+}
+
+.mode-sombre .dropdown-menu-right label.dropdown-item {
+    color: #fff;
+}
+
+.mode-sombre .dropdown-toggle {
+    color: #fff;
+}
+
+.mode-sombre .dropdown-toggle:hover {
+    color: #fff;
+}
+
+.mode-sombre .dropdown-menu-sm a.dropdown-item {
+    color: #fff;
+}
+
+.mode-sombre .dropdown-menu-sm a.dropdown-item:hover {
+    color: #fff;
+    background-color: transparent;
+}
+
+.mode-sombre .dropdown-menu-sm {
+    background-color: #333;
+    border-color: #fff;
+}
+
+
+.mode-sombre.navbar {
+    background-color: #333 !important;
+    color: #fff !important;
+    border-bottom: 1px solid #fff !important;
+}
+
+.mode-sombre .navbar .dropdown-menu {
+    background-color: #333;
+    border-color: #fff;
+    color: #fff;
+}
+
+.mode-sombre .navbar .dropdown-menu .dropdown-item {
+    color: #fff;
+}
+
+.mode-sombre .navbar .dropdown-menu .dropdown-item:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.mode-sombre .navbar .navbar-text {
+    color: #fff;
+}
+
+
+.card {
+    background-color: #444;
+    border: 1px solid #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.card-header {
+    background-color: #555;
+    color: #333;
+}
+
+.form-control {
+    background-color: #666;
+    border: 1px solid #fff;
+    color: #fff;
+}
+
+.btn-primary {
+    background-color: #777;
+    border-color: #fff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #888;
+    border-color: #fff;
+    color: #fff;
+}
+
+.btn-retour {
+    position: absolute;
+    top: 5%;
+    left: 10%;
+}
+
+.card {
+    margin-top: 10%;
+}
+
+
+#contactsList {
+    display: block;
+}
+
+#contactsCards {
+    display: none;
+}
+
+.custom-danger-bg {
+    background-color: #FF0000;
+}
+
+.custom-flash {
+    background-color: #FF0000;
+    color: #FFFFFF;
+}
+

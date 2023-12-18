@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Carnet d'adresses</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+</head>
+<body class="{% if mode_sombre_active %} mode-sombre {% endif %}">
+
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="d-flex justify-content-end align-items-center w-100">
+        <div style="margin-right: 13px; font-weight: bold;">
+            <span class="navbar-text" style="font-size: 1.4rem;">
+                {{ username }}
+            </span>
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-link btn-custom btn-three-dots" type="button" id="otherDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="otherDropdownMenuButton">
+                <a id="affichageListe" class="dropdown-item" href="#" > <i class="bi bi-list"></i>  Affichage en liste</a>
+                <a id="affichageCartes" class="dropdown-item" href="#"><i class="bi bi-card-heading"></i>  Affichage en cartes</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" onclick="exportContacts()"><i class="bi bi-box-arrow-down"></i>  Exporter</a>
+                <form action="/importer_contacts" method="post" enctype="multipart/form-data">
+                    <label for="csv_file" class="dropdown-item"> <i class="bi bi-download"></i>  Importer</label>
+                    <input type="file" name="fichier_csv" id="csv_file" style="display: none;" onchange="this.form.submit()">
+                </form>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" onclick="activerModeSombre()"><i class="bi bi-moon-fill"></i>  Mode sombre</a>
+                <a class="dropdown-item" href="#" onclick="desactiverModeSombre()"><i class="bi bi-sun-fill"></i>  Mode clair</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-in-left"></i>  Deconnexion</a>
+                <form action="{{ url_for('supprimer_compte') }}" method="POST" id="form-supprimer-compte">
+                    <button type="submit" class="dropdown-item">
+                        <i class="bi bi-person-x"></i> Supprimer le compte
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-sm mt-5 custom-container shadow">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- Utilisation de la nouvelle classe pour centrer le titre -->
+        <h1 class="center-title">Carnet d'adresses</h1>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ url_for('ajout') }}" class="btn btn-primary btn-custom"><i class="bi bi-person-plus"></i> Créer un nouveau contact</a>
+
+        <!-- Options de tri -->
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Trier
+            </button>
+            <div class="dropdown-menu dropdown-menu-sm" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="{{ url_for('trier_contacts', critere='ajout_croi') }}">Par Date (croissant)</a>
+                <a class="dropdown-item" href="{{ url_for('trier_contacts', critere='ajout_decroi') }}">Par Date (décroissant)</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ url_for('trier_contacts', critere='prenom') }}">Par Prénom</a>
+                <a class="dropdown-item" href="{{ url_for('trier_contacts', critere='nom') }}">Par Nom</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" id="filtrageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Filtrer
+            </button>
+            <div class="dropdown-menu dropdown-menu-sm" aria-labelledby="filtrageDropdown">
+                <a class="dropdown-item" href="{{ url_for('filtrer_contacts', critere='aucun') }}">Aucun filtre</a>
+                <a class="dropdown-item" href="{{ url_for('filtrer_contacts', critere='famille') }}">Famille</a>
+                <a class="dropdown-item" href="{{ url_for('filtrer_contacts', critere='professionnel') }}">Professionnel</a>
+                <a class="dropdown-item" href="{{ url_for('filtrer_contacts', critere='ami') }}">Amis</a>
+            </div>
+        </div>
+
+        <!-- Barre de recherche -->
+        <div class="search-bar">
+            <form action="{{ url_for('rechercher') }}" method="GET" class="form-inline justify-content-end">
+                <input type="text" class="form-control search-input" placeholder="Rechercher..." aria-label="Rechercher" name="recherche">
+                <button class="btn btn-outline-secondary btn-custom" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class=" text-center alert alert-{{ category }} {% if category == 'custom-style' %}custom-flash{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+<ul class="list-group {% if request.cookies.get('affichage_cartes') != 'true' %}active{% endif %}" id="contactsList">
+        {% if contacts %}
+            {% for contact in contacts %}
+            <li class="list-group-item d-flex justify-content-between align-items-center ">
+                <div>
+                    <div class="d-flex align-items-center">
+                        <strong>{{ contact.nom }} {{ contact.prenom }}</strong>
+                            <div class="rounded bg-secondary text-white ml-2 px-2">
+                                {{ contact.classe.nom }}
+                            </div>
+                    </div>
+                    <div>
+                        Téléphone: {{ contact.numero }}<br>
+                        Email: {{ contact.email }}
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <a href="{{ url_for('afficher_formulaire_modification', id_contact=contact.id) }}" class="btn btn-success btn-sm btn-custom rounded">
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+                    <button class="btn btn-danger btn-sm btn-custom ml-2 rounded" onclick="confirmDelete({{ contact.id }})">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </div>
+            </li>
+            {% endfor %}
+    {% else %}
+        <p class="text-center">Vous n'avez aucun contact.</p>
+    {% endif %}
+</ul>
+
+
+<div class="container mt-5 {% if affichage_cartes %}active{% endif %}" id="contactsCards">
+    <div class="row">
+        {% if contacts %}
+            {% for contact in contacts %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+    <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">{{ contact.nom }} {{ contact.prenom }}</h5>
+            <div class="rounded bg-secondary text-white px-2">
+                {{ contact.classe.nom }}
+            </div>
+        </div>
+        <div>
+            <div>
+                Téléphone: {{ contact.numero }}<br>
+                Email: {{ contact.email }}
+            </div>
+        </div>
+        <br>
+        <div class="btn-group">
+            <a href="{{ url_for('afficher_formulaire_modification', id_contact=contact.id) }}" class="btn btn-success btn-sm btn-custom rounded">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <button class="btn btn-danger btn-sm btn-custom ml-2 rounded" onclick="confirmDelete({{ contact.id }})">
+                <i class="bi bi-trash"></i> Supprimer
+            </button>
+        </div>
+    </div>
+</div>
+
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col">
+                <p class="text-center mt-3 text-white bg-danger py-2">Vous n'avez aucun contact.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+
+
+
+
+    <script src="/static/script.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
