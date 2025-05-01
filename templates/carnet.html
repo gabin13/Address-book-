@@ -118,7 +118,10 @@
                 </div>
 
                 <div class="btn-group">
-                    <a href="{{ url_for('afficher_formulaire_modification', id_contact=contact.id) }}" class="btn btn-success btn-sm btn-custom rounded">
+                    <a href="mailto:{{ contact.email }}" class="btn btn-secondary btn-sm btn-custom ml-2 rounded">
+                        <i class="bi bi-envelope"></i> Ecrire
+                    </a>
+                    <a href="{{ url_for('afficher_formulaire_modification', id_contact=contact.id) }}" class="btn btn-success btn-sm btn-custom rounded ml-2">
                         <i class="bi bi-pencil"></i> Modifier
                     </a>
                     <button class="btn btn-danger btn-sm btn-custom ml-2 rounded" onclick="confirmDelete({{ contact.id }})">

@@ -59,3 +59,5 @@ document.getElementById('form-supprimer-compte').addEventListener('submit', func
         this.submit(); // Soumission du formulaire si la confirmation est acceptée
     }
 });
+
+
