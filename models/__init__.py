@@ -1,0 +1,1 @@
+# models/__init__.py - Fichier d'initialisation des modèles
