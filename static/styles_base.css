@@ -8,6 +8,27 @@ body, html {
     background-color: #2c3e50;
     padding-top: 80px;
     height: 100vh;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Responsive pour la section hero */
+@media (max-width: 768px) {
+    .hero {
+        padding-top: 70px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero {
+        padding-top: 60px;
+        padding-left: 5px;
+        padding-right: 5px;
+        height: auto;
+        min-height: 100vh;
+    }
 }
 
 .navbar {
@@ -15,6 +36,20 @@ body, html {
     width: 100%;
     top: 0;
     z-index: 1000;
+    padding: 0.5rem 1rem;
+}
+
+/* Responsive pour la navbar */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar {
+        padding: 0.25rem 0.5rem;
+    }
 }
 
 .navbar-brand {
@@ -22,12 +57,27 @@ body, html {
     color: #ecf0f1;
 }
 
-    .navbar-dark .navbar-nav .nav-link {
-        color: rgba(255, 255, 255, 0.7);
+/* Responsive pour le brand */
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .navbar-dark .navbar-nav .nav-link:hover {
     color: rgba(255, 255, 255, 0.9);
+}
+
+/* Responsive pour les liens navbar */
+@media (max-width: 576px) {
+    .navbar-dark .navbar-nav .nav-link {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
 }
 
 .display-4 {
@@ -37,10 +87,48 @@ body, html {
     color: #ecf0f1;
 }
 
+/* Responsive pour le titre principal */
+@media (max-width: 992px) {
+    .display-4 {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-4 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+}
+
 .lead {
     font-size: 1.5rem;
     margin-bottom: 30px;
     color: #bdc3c7;
+}
+
+/* Responsive pour le sous-titre */
+@media (max-width: 768px) {
+    .lead {
+        font-size: 1.3rem;
+        margin-bottom: 25px;
+    }
+}
+
+@media (max-width: 576px) {
+    .lead {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
 }
 
 .btn-primary {
@@ -53,7 +141,150 @@ body, html {
     border-color: #2980b9;
 }
 
+/* Responsive pour les boutons */
+@media (max-width: 576px) {
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+        display: block;
+    }
+}
+
 .custom-flash {
     background-color: #FF0000;
     color: #FFFFFF;
+}
+
+/* Responsive pour les alertes */
+@media (max-width: 768px) {
+    .alert {
+        margin: 0 10px 15px 10px;
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .alert {
+        margin: 0 5px 10px 5px;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive pour les cartes d'authentification */
+@media (max-width: 768px) {
+    .hero .col-md-6 {
+        flex: 0 0 85%;
+        max-width: 85%;
+    }
+    
+    .hero .col-md-8 {
+        flex: 0 0 90%;
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero .col-md-6 {
+        flex: 0 0 95%;
+        max-width: 95%;
+    }
+    
+    .hero .col-md-8 {
+        flex: 0 0 95%;
+        max-width: 95%;
+    }
+    
+    .card {
+        margin-top: 1rem !important;
+    }
+    
+    .card-body {
+        padding: 1.25rem 1rem;
+    }
+}
+
+/* Responsive pour les formulaires d'authentification */
+@media (max-width: 576px) {
+    .form-group label {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .form-control {
+        font-size: 16px; /* Évite le zoom automatique sur iOS */
+        padding: 0.75rem;
+    }
+    
+    .btn-block {
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+}
+
+/* Amélioration de la lisibilité sur mobile */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .text-center p {
+        font-size: 0.9rem;
+    }
+    
+    .text-center a {
+        font-weight: 500;
+    }
+}
+
+/* Responsive pour les groupes d'input */
+@media (max-width: 576px) {
+    .input-group-text {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .input-group-append .input-group-text {
+        border-left: none;
+    }
+}
+
+/* Amélioration de l'expérience tactile */
+@media (max-width: 768px) {
+    .btn {
+        min-height: 44px; /* Taille minimum recommandée pour les éléments tactiles */
+    }
+    
+    .form-control {
+        min-height: 44px;
+    }
+    
+    .dropdown-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* Optimisation pour les très petits écrans */
+@media (max-width: 320px) {
+    .display-4 {
+        font-size: 1.75rem;
+    }
+    
+    .lead {
+        font-size: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem 0.75rem;
+    }
+    
+    .btn-lg {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
 }

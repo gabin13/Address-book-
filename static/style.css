@@ -18,6 +18,16 @@ body.mode-sombre {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
     background-color: #ffffff;
+    margin: 0 15px; /* Marge pour mobile */
+}
+
+/* Responsive pour custom-container */
+@media (max-width: 576px) {
+    .custom-container {
+        padding: 15px;
+        margin: 0 10px;
+        border-radius: 6px;
+    }
 }
 
 .btn-custom {
@@ -29,14 +39,61 @@ body.mode-sombre {
     border-color: #6c757d;
 }
 
+/* Responsive pour les boutons */
+@media (max-width: 768px) {
+    .btn-custom {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn-custom {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
 .search-bar {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .search-input {
     width: 300px;
     margin-right: 10px;
+}
+
+/* Responsive pour la barre de recherche */
+@media (max-width: 768px) {
+    .search-input {
+        width: 200px;
+        margin-right: 5px;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-bar {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .search-input {
+        width: 150px;
+        margin-right: 5px;
+    }
+
+    .search-bar .form-inline {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .dropdown-item {
@@ -65,6 +122,22 @@ body.mode-sombre {
     padding-left: 35%;
 }
 
+/* Responsive pour le titre centré */
+@media (max-width: 768px) {
+    .center-title {
+        padding-left: 0;
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .center-title {
+        font-size: 1.5rem;
+        padding: 0;
+        margin-bottom: 15px;
+    }
+}
+
 .btn-three-dots {
     font-size: 1.5em;
     color: black;
@@ -73,6 +146,18 @@ body.mode-sombre {
 .dropdown-menu {
     min-width: 10rem;
     right: 0; /* Aligner le menu sur la droite */
+}
+
+/* Responsive pour le dropdown */
+@media (max-width: 576px) {
+    .dropdown-menu {
+        min-width: 8rem;
+        font-size: 0.875rem;
+    }
+
+    .dropdown-item {
+        padding: 0.375rem 0.75rem;
+    }
 }
 
 .mode-sombre .list-group-item {
@@ -183,6 +268,25 @@ body.mode-sombre {
     border: 1px solid #fff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    margin-bottom: 20px; /* Espacement pour mobile */
+}
+
+/* Responsive pour les cartes */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .card {
+        margin-bottom: 10px;
+        border-radius: 8px;
+    }
+
+    .card-body {
+        padding: 1rem 0.75rem;
+    }
 }
 
 .card-header {
@@ -194,6 +298,13 @@ body.mode-sombre {
     background-color: #34495e; /* Bleu légèrement plus clair */
     border: 1px solid #fff;
     color: #fff;
+}
+
+/* Responsive pour les formulaires */
+@media (max-width: 576px) {
+    .form-control {
+        font-size: 16px; /* Évite le zoom sur iOS */
+    }
 }
 
 .btn-primary {
@@ -214,8 +325,38 @@ body.mode-sombre {
     left: 10%;
 }
 
+/* Responsive pour le bouton retour */
+@media (max-width: 768px) {
+    .btn-retour {
+        position: relative;
+        top: auto;
+        left: auto;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn-retour {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+}
+
 .card {
     margin-top: 10%;
+}
+
+/* Responsive pour la marge top des cartes */
+@media (max-width: 768px) {
+    .card {
+        margin-top: 5%;
+    }
+}
+
+@media (max-width: 576px) {
+    .card {
+        margin-top: 20px;
+    }
 }
 
 #contactsList {
@@ -226,6 +367,75 @@ body.mode-sombre {
     display: none;
 }
 
+/* Responsive pour les listes et cartes de contacts */
+.list-group-item {
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .list-group-item {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .list-group-item .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .list-group-item .btn-group {
+        margin-top: 15px;
+        width: 100%;
+        display: flex;
+        gap: 5px;
+    }
+
+    .list-group-item .btn-group .btn {
+        flex: 1;
+        margin: 0;
+        font-size: 0.85rem;
+        padding: 8px 4px;
+    }
+}
+
+@media (max-width: 576px) {
+    .list-group-item {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .list-group-item .d-flex.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+        margin-bottom: 10px;
+    }
+
+    .list-group-item .d-flex.align-items-center strong {
+        margin-bottom: 5px;
+        font-size: 1.1rem;
+    }
+
+    .list-group-item .rounded.bg-secondary {
+        margin: 0 !important;
+        font-size: 0.75rem;
+    }
+
+    .list-group-item .btn-group {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+        margin-top: 15px;
+    }
+
+    .list-group-item .btn-group .btn {
+        margin: 0;
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
 .custom-danger-bg {
     background-color: #FF0000;
 }
@@ -233,4 +443,416 @@ body.mode-sombre {
 .custom-flash {
     background-color: #FF0000;
     color: #FFFFFF;
+}
+
+/* Responsive pour la navbar */
+.navbar {
+    padding: 0.5rem 1rem;
+}
+
+/* Alignement du pseudo et du bouton menu sur la même ligne */
+.navbar .d-flex.justify-content-end.align-items-center {
+    align-items: center !important;
+}
+
+.navbar .navbar-text {
+    margin-bottom: 0 !important;
+    line-height: 1 !important;
+}
+
+.navbar .btn-three-dots {
+    margin-bottom: 0 !important;
+    line-height: 1 !important;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .navbar-text {
+        font-size: 1.2rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar {
+        padding: 0.5rem 0.5rem;
+    }
+
+    .navbar-text {
+        font-size: 1rem !important;
+    }
+}
+
+/* Responsive pour les contrôles du carnet */
+@media (max-width: 768px) {
+    .d-flex.justify-content-between.align-items-center.mb-3 {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    /* Première ligne - titre centré */
+    .d-flex.justify-content-between.align-items-center.mb-3:first-child {
+        flex-direction: row;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    /* Deuxième ligne - contrôles */
+    .d-flex.justify-content-between.align-items-center.mb-3:last-child {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Ligne des boutons de contrôle */
+    .d-flex.justify-content-between.align-items-center.mb-3:last-child > div:first-child {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Conteneur principal plus compact */
+    .custom-container {
+        margin: 10px 5px;
+        padding: 15px 10px;
+    }
+
+    /* Titre principal */
+    .center-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 0;
+        padding: 0;
+    }
+
+    /* Container pour les contrôles */
+    .d-flex.justify-content-between.align-items-center.mb-3:last-child {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    /* Réorganisation complète des contrôles sur mobile */
+    .d-flex.justify-content-between.align-items-center.mb-3:last-child {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Bouton créer contact en premier */
+    .d-flex.justify-content-between.align-items-center.mb-3:last-child .btn-primary {
+        order: 1;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    /* Conteneur pour trier et filtrer */
+    .d-flex.justify-content-between.align-items-center.mb-3:last-child .dropdown:nth-child(2),
+    .d-flex.justify-content-between.align-items-center.mb-3:last-child .dropdown:nth-child(3) {
+        order: 2;
+        width: 48%;
+        display: inline-block;
+    }
+
+    /* Barre de recherche en dernier */
+    .search-bar {
+        order: 3;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .dropdown {
+        width: 100%;
+    }
+
+    .dropdown .btn {
+        width: 100%;
+        text-align: left;
+    }
+}
+
+/* Responsive pour les cartes de contacts */
+#contactsCards {
+    margin-top: 20px;
+}
+
+#contactsCards .row {
+    margin: 0 -10px;
+}
+
+#contactsCards .col-md-4 {
+    padding: 0 10px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 992px) {
+    #contactsCards .col-md-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 768px) {
+    #contactsCards .col-md-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        padding: 0 8px;
+        margin-bottom: 15px;
+    }
+
+    #contactsCards .card {
+        height: auto;
+        min-height: 220px;
+    }
+
+    #contactsCards .card-body {
+        padding: 1rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    #contactsCards .card .btn-group {
+        flex-direction: column;
+        width: 100%;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    #contactsCards .card .btn-group .btn {
+        margin: 0;
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 6px 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    #contactsCards .col-md-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        padding: 0 5px;
+        margin-bottom: 15px;
+    }
+
+    #contactsCards .card {
+        min-height: auto;
+    }
+
+    #contactsCards .card-body {
+        padding: 1rem;
+    }
+
+    #contactsCards .card .d-flex.align-items-center.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+
+    #contactsCards .card .btn-group {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+        margin-top: 15px;
+    }
+
+    #contactsCards .card .btn-group .btn {
+        margin: 0;
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    #contactsCards .card .rounded.bg-secondary {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+}
+
+/* Responsive pour les colonnes de formulaire */
+@media (max-width: 576px) {
+    .form-row .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Amélioration spécifique pour mobile - disposition des contrôles */
+@media (max-width: 576px) {
+    /* Container principal de la page carnet */
+    .container-sm.mt-5.custom-container {
+        margin-top: 1rem !important;
+        padding: 15px 10px;
+    }
+
+    /* Garder la disposition horizontale mais avec des tailles adaptées */
+    .d-flex.justify-content-between.align-items-center.mb-3 {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    /* Bouton créer contact - taille réduite */
+    .d-flex.justify-content-between.align-items-center.mb-3 > .btn-primary {
+        flex: 0 0 auto;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        order: 1;
+    }
+
+    /* Dropdowns Trier et Filtrer - taille réduite */
+    .d-flex.justify-content-between.align-items-center.mb-3 > .dropdown {
+        flex: 0 0 auto;
+        width: auto !important;
+        margin: 0 !important;
+        order: 2;
+    }
+
+    .d-flex.justify-content-between.align-items-center.mb-3 .dropdown .btn {
+        width: auto !important;
+        padding: 10px 15px;
+        font-size: 0.85rem;
+        text-align: center;
+        border: 1px solid #6c757d;
+        border-radius: 6px;
+        background-color: transparent;
+        color: inherit;
+        white-space: nowrap;
+        min-width: 80px;
+    }
+
+    /* Barre de recherche - prend l'espace restant */
+    .d-flex.justify-content-between.align-items-center.mb-3 > .search-bar {
+        flex: 1 1 auto;
+        width: auto !important;
+        margin: 0 !important;
+        order: 3;
+        min-width: 150px;
+    }
+
+    .search-bar .form-inline {
+        width: 100% !important;
+        display: flex !important;
+        gap: 5px;
+    }
+
+    .search-bar .search-input {
+        flex: 1 !important;
+        width: auto !important;
+        margin-right: 0 !important;
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 6px;
+        min-width: 0;
+    }
+
+    .search-bar .btn {
+        flex-shrink: 0;
+        width: 40px !important;
+        height: 40px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    /* Si les éléments ne tiennent pas sur une ligne, passage à la ligne */
+    @media (max-width: 400px) {
+        .d-flex.justify-content-between.align-items-center.mb-3 {
+            flex-wrap: wrap;
+        }
+
+        .d-flex.justify-content-between.align-items-center.mb-3 > .btn-primary {
+            flex: 0 0 100%;
+            width: 100% !important;
+            margin-bottom: 10px !important;
+            order: 1;
+        }
+
+        .d-flex.justify-content-between.align-items-center.mb-3 > .dropdown {
+            flex: 0 0 auto;
+            order: 2;
+        }
+
+        .d-flex.justify-content-between.align-items-center.mb-3 > .search-bar {
+            flex: 1 1 auto;
+            order: 3;
+        }
+    }
+
+    /* Ajustement des dropdowns pour mobile */
+    .dropdown-menu {
+        width: auto !important;
+        min-width: 120px;
+        left: 0 !important;
+        right: auto !important;
+        transform: none !important;
+        margin-top: 2px;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .dropdown-item {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    /* Mode sombre - ajustements pour les boutons dropdown */
+    .mode-sombre .dropdown .btn {
+        border-color: #fff !important;
+        color: #fff !important;
+        background-color: transparent !important;
+    }
+
+    .mode-sombre .dropdown .btn:hover,
+    .mode-sombre .dropdown .btn:focus {
+        background-color: rgba(255,255,255,0.1) !important;
+        border-color: #fff !important;
+    }
+
+    /* Amélioration de la navbar sur mobile */
+    .navbar .d-flex {
+        padding: 0 10px;
+    }
+
+    .navbar .navbar-text {
+        font-size: 1.1rem !important;
+        margin-right: 10px !important;
+    }
+}
+
+/* Responsive pour les badges/tags */
+@media (max-width: 576px) {
+    .rounded.bg-secondary.text-white {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Amélioration de l'affichage des informations de contact */
+@media (max-width: 576px) {
+    .list-group-item div:first-child {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .d-flex.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .d-flex.align-items-center .rounded {
+        margin: 5px 0 0 0 !important;
+    }
 }
