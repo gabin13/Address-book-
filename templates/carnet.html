@@ -157,6 +157,9 @@
         </div>
         <br>
         <div class="btn-group">
+            <a href="mailto:{{ contact.email }}" class="btn btn-secondary btn-sm btn-custom ml-2 rounded">
+                <i class="bi bi-envelope"></i> Ecrire
+            </a>
             <a href="{{ url_for('afficher_formulaire_modification', id_contact=contact.id) }}" class="btn btn-success btn-sm btn-custom rounded">
                 <i class="bi bi-pencil"></i> Modifier
             </a>

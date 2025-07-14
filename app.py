@@ -14,7 +14,7 @@ app = Flask(__name__)
 carnet = CarnetAdresse()
 app.secret_key = "b'_5#y2LF4Q8z\n\xec]/'"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:_root453*@localhost:3306/hackathon'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost:3306/addressBook'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -27,6 +27,8 @@ class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)  # Ajout de l'email
+    phone = db.Column(db.String(20), nullable=False)  # Ajout du téléphone
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -95,35 +97,52 @@ def login():
     error = None
 
     if request.method == 'POST':
-        user = User.query.filter_by(username=request.form['username']).first()
+        email = request.form['email']
+        password = request.form['password']
 
-        if user and bcrypt.check_password_hash(user.password, request.form['password']):
-            session['username'] = request.form['username']
+        user = User.query.filter_by(email=email).first()
+
+        if user and bcrypt.check_password_hash(user.password, password):
+            session['username'] = user.username
             session['user_id'] = user.id
             return redirect(url_for('carnet'))
         else:
-            error = 'Invalid username/password'
+            error = 'Adresse email ou mot de passe invalide'
 
     return render_template('auth/login.html', error=error)
-
 
 
 @app.get('/register')
 def register():
     return render_template('auth/register.html')
 
+
 @app.post('/inscription')
 def inscription():
     username = request.form['username']
+    email = request.form['email']
+    phone = request.form['phone']
     password = request.form['password']
 
+    # Vérifier si le nom d'utilisateur existe déjà
     existing_user = User.query.filter_by(username=username).first()
     if existing_user:
         flash('Ce nom d\'utilisateur est déjà utilisé.', 'custom-style')
         return redirect(url_for('register'))
 
+    # Vérifier si l'email existe déjà
+    existing_email = User.query.filter_by(email=email).first()
+    if existing_email:
+        flash('Cette adresse email est déjà utilisée.', 'custom-style')
+        return redirect(url_for('register'))
+
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_user = User(username=username, password=hashed_password)
+    new_user = User(
+        username=username,
+        email=email,
+        phone=phone,
+        password=hashed_password
+    )
 
     db.session.add(new_user)
     db.session.commit()
@@ -199,6 +218,16 @@ def ajouter():
             flash('Ce contact existe déjà.', 'custom-style')
             return redirect(url_for('carnet'))
 
+        existing_number = Contact.query.filter_by(numero=numero, user_id=user_id).first()
+        if existing_number:
+            flash('Un contact avec ce numéro de téléphone existe déjà.', 'custom-style')
+            return redirect(url_for('ajout'))
+
+        existing_email = Contact.query.filter_by(email=email, user_id=user_id).first()
+        if existing_email:
+            flash('Un contact avec ce mail existe déjà.', 'custom-style')
+            return redirect(url_for('ajout'))
+
         classe = Classe.query.filter_by(nom=classe_nom).first()
 
         if classe:
@@ -262,15 +291,27 @@ def afficher_formulaire_modification(id_contact):
 @app.route('/modifier/<int:id_contact>', methods=['POST'])
 def modifier_contact(id_contact):
     contact_a_modifier = Contact.query.get_or_404(id_contact)
+    user_id = session.get('user_id')
+
+    nouveau_numero = request.form['numero']
+    existing_number = Contact.query.filter(
+        Contact.numero == nouveau_numero,
+        Contact.user_id == user_id,
+        Contact.id != id_contact
+    ).first()
+
+    if existing_number:
+        flash('Un contact avec ce numéro de téléphone existe déjà.', 'custom-style')
+        return redirect(url_for('afficher_formulaire_modification', id_contact=id_contact))
 
     contact_a_modifier.nom = request.form['nom']
     contact_a_modifier.prenom = request.form['prenom']
     contact_a_modifier.email = request.form['email']
-    contact_a_modifier.numero = request.form['numero']
+    contact_a_modifier.numero = nouveau_numero
     contact_a_modifier.classe_id = request.form['classe']
 
     db.session.commit()
-
+    flash('Contact modifié avec succès', 'success')
     return redirect(url_for('carnet'))
 
 
@@ -388,25 +429,57 @@ def importer_contacts():
         lecteur = csv.reader(lignes, delimiter=',')
         next(lecteur, None)
 
+        contacts_importes = 0
+        contacts_ignores = 0
+
         for ligne in lecteur:
+            if len(ligne) < 4:  # Vérifier que la ligne a suffisamment de colonnes
+                contacts_ignores += 1
+                continue
+
+            # Vérification si le contact existe déjà (nom et prénom)
             contact_existant = Contact.query.filter_by(
                 nom=ligne[0],
                 prenom=ligne[1],
                 user_id=user_id
             ).first()
 
-            if not contact_existant:
+            # Vérification si le numéro existe déjà
+            numero_existant = Contact.query.filter_by(
+                numero=ligne[3],
+                user_id=user_id
+            ).first()
+
+            if not contact_existant and not numero_existant:
+                # Déterminer la classe (par défaut: famille)
+                classe_id = 1
+                # Si un 5e champ existe, essayer de l'utiliser comme classe
+                if len(ligne) > 4 and ligne[4]:
+                    classe = Classe.query.filter_by(nom=ligne[4].lower()).first()
+                    if classe:
+                        classe_id = classe.id
+
                 nouveau_contact = Contact(
                     nom=ligne[0],
                     prenom=ligne[1],
                     email=ligne[2],
                     numero=ligne[3],
-                    user_id=user_id
+                    user_id=user_id,
+                    classe_id=classe_id
                 )
                 db.session.add(nouveau_contact)
+                contacts_importes += 1
+            else:
+                contacts_ignores += 1
 
         db.session.commit()
-        flash('Importation des contacts réussie.', 'success')
+        if contacts_importes > 0:
+            flash(
+                f'Importation réussie : {contacts_importes} contacts importés, {contacts_ignores} ignorés (noms ou numéros déjà existants).',
+                'success')
+        else:
+            flash('Aucun nouveau contact importé. Tous les contacts existaient déjà (noms ou numéros identiques).',
+                  'custom-style')
         return redirect(url_for('carnet'))
     else:
         flash('Échec de l\'importation des contacts.', 'custom-style')

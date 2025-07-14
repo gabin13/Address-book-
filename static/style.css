@@ -3,15 +3,14 @@ body {
 }
 
 .mode-sombre {
-    background-color: #333;
+    background-color: #2c3e50;
     color: #fff;
 }
 
 body.mode-sombre {
-    background-color: #333; /* Fond sombre */
+    background-color: #2c3e50; /* Fond bleu sombre */
     color: #fff; /* Texte en couleur claire */
 }
-
 
 .custom-container {
     border: 1px solid #ced4da;
@@ -77,13 +76,13 @@ body.mode-sombre {
 }
 
 .mode-sombre .list-group-item {
-    background-color: #333; /* Fond sombre */
+    background-color: #2c3e50; /* Fond bleu sombre */
     color: #fff; /* Texte en couleur claire */
     border-color: #fff;
 }
 
 .mode-sombre .custom-container {
-    background-color: #333;
+    background-color: #2c3e50;
     color: #fff;
     border-color: #fff;
 }
@@ -93,15 +92,15 @@ body.mode-sombre {
     color: #fff;
 }
 
-
 .mode-sombre .card {
-    background-color: #333;
+    background-color: #2c3e50;
     color: #fff;
     border-color: #fff;
+    box-shadow: 0 0 15px rgba(52, 73, 94, 0.8); /* Ombre bleue plus visible en mode sombre */
 }
 
 .mode-sombre .card-body {
-    background-color: #333;
+    background-color: #2c3e50;
 }
 
 .mode-sombre .card-title {
@@ -109,13 +108,12 @@ body.mode-sombre {
 }
 
 .mode-sombre .rounded.bg-secondary.text-white {
-    background-color: #555;
+    background-color: #34495e; /* Bleu légèrement plus clair que #2c3e50 */
     color: #fff;
 }
 
-
 .mode-sombre .dropdown-menu-right {
-    background-color: #333;
+    background-color: #2c3e50;
     border-color: #fff;
     color: #fff;
 }
@@ -151,19 +149,18 @@ body.mode-sombre {
 }
 
 .mode-sombre .dropdown-menu-sm {
-    background-color: #333;
+    background-color: #2c3e50;
     border-color: #fff;
 }
 
-
 .mode-sombre.navbar {
-    background-color: #333 !important;
+    background-color: #2c3e50 !important;
     color: #fff !important;
     border-bottom: 1px solid #fff !important;
 }
 
 .mode-sombre .navbar .dropdown-menu {
-    background-color: #333;
+    background-color: #2c3e50;
     border-color: #fff;
     color: #fff;
 }
@@ -173,7 +170,7 @@ body.mode-sombre {
 }
 
 .mode-sombre .navbar .dropdown-menu .dropdown-item:hover {
-    background-color: #444;
+    background-color: #34495e; /* Bleu légèrement plus clair pour le hover */
     color: #fff;
 }
 
@@ -181,34 +178,33 @@ body.mode-sombre {
     color: #fff;
 }
 
-
 .card {
-    background-color: #444;
+    background-color: #34495e; /* Bleu légèrement plus clair que #2c3e50 */
     border: 1px solid #fff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .card-header {
-    background-color: #555;
-    color: #333;
+    background-color: #2c3e50; /* Bleu principal */
+    color: #fff; /* Texte blanc au lieu de noir */
 }
 
 .form-control {
-    background-color: #666;
+    background-color: #34495e; /* Bleu légèrement plus clair */
     border: 1px solid #fff;
     color: #fff;
 }
 
 .btn-primary {
-    background-color: #777;
-    border-color: #fff;
+    background-color: #3498db; /* Bleu plus vif pour les boutons */
+    border-color: #3498db;
     color: #fff;
 }
 
 .btn-primary:hover {
-    background-color: #888;
-    border-color: #fff;
+    background-color: #2980b9; /* Bleu plus foncé au hover */
+    border-color: #2980b9;
     color: #fff;
 }
 
@@ -221,7 +217,6 @@ body.mode-sombre {
 .card {
     margin-top: 10%;
 }
-
 
 #contactsList {
     display: block;
@@ -239,4 +234,3 @@ body.mode-sombre {
     background-color: #FF0000;
     color: #FFFFFF;
 }
-
