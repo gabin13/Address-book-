@@ -14,23 +14,22 @@ import os
 app = Flask(__name__)
 carnet = CarnetAdresse()
 
-# Configuration selon l'environnement
-config_name = os.environ.get('FLASK_ENV', 'development')
-if config_name == 'production':
-    from config import ProductionConfig
-
-    app.config.from_object(ProductionConfig)
+# Configuration de la base de données selon l'environnement
+if os.environ.get('FLASK_ENV') == 'production':
+    # Configuration pour la production (Render avec PostgreSQL)
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+    app.config['DEBUG'] = False
 else:
-    from config import DevelopmentConfig
+    # Configuration pour le développement local
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///addressbook.db'  # SQLite pour le dev
+    app.config['SECRET_KEY'] = "b'_5#y2LF4Q8z\n\xec]/'"
+    app.config['DEBUG'] = True
 
-    app.config.from_object(DevelopmentConfig)
-
-# Configuration de base si pas dans config
-if not app.config.get('SECRET_KEY'):
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "b'_5#y2LF4Q8z\n\xec]/'")
-
-if not app.config.get('SQLALCHEMY_DATABASE_URI'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///addressbook.db')
+# Gestion des URLs PostgreSQL (Render utilise parfois postgres:// au lieu de postgresql://)
+if app.config['SQLALCHEMY_DATABASE_URI'] and app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://',
+                                                                                          'postgresql://', 1)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -70,29 +69,40 @@ class Contact(db.Model):
     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-# Créer les tables et données initiales
-def create_tables():
-    with app.app_context():
-        db.create_all()
+# Initialisation de la base de données
+def init_database():
+    """Initialise la base de données avec les tables et données par défaut"""
+    try:
+        with app.app_context():
+            db.create_all()
 
-        # Créer les classes par défaut si elles n'existent pas
-        if not Classe.query.first():
-            classes = [
-                Classe(id=1, nom='famille'),
-                Classe(id=2, nom='professionnel'),
-                Classe(id=3, nom='ami')
-            ]
-            for classe in classes:
-                db.session.add(classe)
-            db.session.commit()
+            # Créer les classes par défaut si elles n'existent pas
+            if not Classe.query.first():
+                classes = [
+                    Classe(id=1, nom='famille'),
+                    Classe(id=2, nom='professionnel'),
+                    Classe(id=3, nom='ami')
+                ]
+                for classe in classes:
+                    db.session.add(classe)
 
-#Activation du mode sombre
+                try:
+                    db.session.commit()
+                    print("✅ Base de données initialisée avec succès")
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"⚠️  Erreur lors de l'initialisation: {e}")
+    except Exception as e:
+        print(f"❌ Erreur lors de l'initialisation de la DB: {e}")
 
+
+# Routes pour les modes
 @app.route('/activer_mode_sombre')
 def activer_mode_sombre():
     response = make_response(redirect(url_for('index')))
     response.set_cookie('mode_sombre', 'true')
     return response
+
 
 @app.route('/desactiver_mode_sombre')
 def desactiver_mode_sombre():
@@ -101,13 +111,12 @@ def desactiver_mode_sombre():
     return response
 
 
-#Affichage des cartes
-
 @app.route('/activer_affichage_cartes')
 def activer_affichage_cartes():
     response = make_response(redirect(url_for('index')))
     response.set_cookie('affichage_cartes', 'true')
     return response
+
 
 @app.route('/desactiver_affichage_cartes')
 def desactiver_affichage_cartes():
@@ -121,26 +130,20 @@ def index():
     return render_template('index.html')
 
 
-
-#user
-
+# Routes d'authentification
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     error = None
-
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-
         user = User.query.filter_by(email=email).first()
-
         if user and bcrypt.check_password_hash(user.password, password):
             session['username'] = user.username
             session['user_id'] = user.id
             return redirect(url_for('carnet'))
         else:
             error = 'Adresse email ou mot de passe invalide'
-
     return render_template('auth/login.html', error=error)
 
 
@@ -156,81 +159,63 @@ def inscription():
     phone = request.form['phone']
     password = request.form['password']
 
-    # Vérifier si le nom d'utilisateur existe déjà
     existing_user = User.query.filter_by(username=username).first()
     if existing_user:
         flash('Ce nom d\'utilisateur est déjà utilisé.', 'custom-style')
         return redirect(url_for('register'))
 
-    # Vérifier si l'email existe déjà
     existing_email = User.query.filter_by(email=email).first()
     if existing_email:
         flash('Cette adresse email est déjà utilisée.', 'custom-style')
         return redirect(url_for('register'))
 
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_user = User(
-        username=username,
-        email=email,
-        phone=phone,
-        password=hashed_password
-    )
-
+    new_user = User(username=username, email=email, phone=phone, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
-
     return redirect(url_for('login'))
+
 
 @app.get('/logout')
 def logout():
     if 'username' in session:
         session.pop('username', None)
-
     return render_template('index.html')
 
 
-
-
-#contact
-
+# Routes pour les contacts
 @app.route('/carnet')
 def carnet():
     mode_sombre_active = request.cookies.get('mode_sombre') == 'true'
     user_id = session.get('user_id')
-
     if user_id is None:
         flash('Vous devez être connecté pour accéder au carnet d\'adresses.', 'custom-style')
         return redirect(url_for('index'))
-
     user = User.query.get(user_id)
     username = user.username if user else "Utilisateur inconnu"
-
     contacts = Contact.query.filter_by(user_id=user_id).all()
-
     affichage_cartes = request.cookies.get('affichage_cartes') == 'true'
+    return render_template('carnet.html', username=username, contacts=contacts,
+                           mode_sombre_active=mode_sombre_active, affichage_cartes=affichage_cartes)
 
-    return render_template('carnet.html', username=username, contacts=contacts, mode_sombre_active=mode_sombre_active, affichage_cartes=affichage_cartes)
 
 @app.get('/ajout')
 def ajout():
     mode_sombre_active = request.cookies.get('mode_sombre') == 'true'
-
     user_id = session.get('user_id')
     if user_id is None:
         flash('Vous devez être connecté pour accéder à cette page.', 'custom-style')
         return redirect(url_for('index'))
-
     user = User.query.get(user_id)
     username = user.username if user else "Utilisateur inconnu"
-
     classes = [
         {'id': 1, 'nom': 'famille'},
         {'id': 2, 'nom': 'professionnel'},
         {'id': 3, 'nom': 'ami'}
     ]
-
     affichage_cartes = request.cookies.get('affichage_cartes') == 'true'
-    return render_template('add.html', username=username, classes=classes, mode_sombre_active=mode_sombre_active, affichage_cartes=affichage_cartes)
+    return render_template('add.html', username=username, classes=classes,
+                           mode_sombre_active=mode_sombre_active, affichage_cartes=affichage_cartes)
 
 
 @app.route('/ajouter', methods=['POST'])
@@ -240,12 +225,10 @@ def ajouter():
     email = request.form['email']
     numero = request.form['numero']
     classe_nom = request.form['classe']
-
     user_id = session.get('user_id')
 
     if user_id:
         existing_contact = Contact.query.filter_by(nom=nom, prenom=prenom, user_id=user_id).first()
-
         if existing_contact:
             flash('Ce contact existe déjà.', 'custom-style')
             return redirect(url_for('carnet'))
@@ -261,21 +244,12 @@ def ajouter():
             return redirect(url_for('ajout'))
 
         classe = Classe.query.filter_by(nom=classe_nom).first()
-
         if classe:
             classe_id = classe.id
-            nouveau_contact = Contact(
-                nom=nom,
-                prenom=prenom,
-                email=email,
-                numero=numero,
-                user_id=user_id,
-                classe_id=classe_id
-            )
-
+            nouveau_contact = Contact(nom=nom, prenom=prenom, email=email, numero=numero, user_id=user_id,
+                                      classe_id=classe_id)
             db.session.add(nouveau_contact)
             db.session.commit()
-
             flash('Contact ajouté avec succès', 'success')
             return redirect(url_for('carnet'))
         else:
@@ -284,8 +258,6 @@ def ajouter():
     else:
         flash('Utilisateur non connecté', 'danger')
         return redirect(url_for('login'))
-
-
 
 
 @app.route('/supprimer/<int:id_contact>', methods=['GET'])
@@ -299,7 +271,6 @@ def supprimer(id_contact):
 @app.route('/modifier/<int:id_contact>', methods=['GET'])
 def afficher_formulaire_modification(id_contact):
     mode_sombre_active = request.cookies.get('mode_sombre') == 'true'
-
     user_id = session.get('user_id')
     if user_id is None:
         flash('Vous devez être connecté pour accéder à cette page.', 'custom-style')
@@ -316,8 +287,9 @@ def afficher_formulaire_modification(id_contact):
     ]
 
     affichage_cartes = request.cookies.get('affichage_cartes') == 'true'
-    return render_template('edit.html', contact=contact, username=username, classes=classes, mode_sombre_active=mode_sombre_active, affichage_cartes=affichage_cartes)
-
+    return render_template('edit.html', contact=contact, username=username,
+                           classes=classes, mode_sombre_active=mode_sombre_active,
+                           affichage_cartes=affichage_cartes)
 
 
 @app.route('/modifier/<int:id_contact>', methods=['POST'])
@@ -353,7 +325,6 @@ def rechercher():
     terme_recherche = request.args.get('recherche', '').lower()
 
     user_id = session.get('user_id')
-
     if user_id is None:
         flash('Vous devez être connecté pour effectuer une recherche.', 'custom-style')
         return redirect(url_for('index'))
@@ -368,8 +339,9 @@ def rechercher():
     ).all()
 
     affichage_cartes = request.cookies.get('affichage_cartes') == 'true'
-    return render_template('recherche.html', resultats=resultats_recherche, username=username, mode_sombre_active=mode_sombre_active, affichage_cartes=affichage_cartes)
-
+    return render_template('recherche.html', resultats=resultats_recherche,
+                           username=username, mode_sombre_active=mode_sombre_active,
+                           affichage_cartes=affichage_cartes)
 
 
 @app.route('/trier/<critere>', methods=['GET'])
@@ -393,24 +365,26 @@ def trier_contacts(critere):
     username = user.username if user else "Utilisateur inconnu"
 
     affichage_cartes = request.cookies.get('affichage_cartes') == 'true'
-    return render_template('carnet.html', contacts=contacts, mode_sombre_active=mode_sombre_active, username=username, affichage_cartes=affichage_cartes)
+    return render_template('carnet.html', contacts=contacts,
+                           mode_sombre_active=mode_sombre_active, username=username,
+                           affichage_cartes=affichage_cartes)
 
 
 @app.route('/filtrer/<string:critere>', methods=['GET'])
 def filtrer_contacts(critere):
     mode_sombre_active = request.cookies.get('mode_sombre') == 'true'
     user_id = session.get('user_id')
-    prev_url = request.referrer
-    contacts = []
 
     if critere == 'aucun':
         contacts = Contact.query.filter(Contact.user_id == user_id).all()
     elif critere == 'famille':
-        contacts = Contact.query.filter(Contact.user_id == user_id, Contact.classe_id == 1).order_by(Contact.prenom).all()
+        contacts = Contact.query.filter(Contact.user_id == user_id, Contact.classe_id == 1).order_by(
+            Contact.prenom).all()
     elif critere == 'professionnel':
         contacts = Contact.query.filter(Contact.user_id == user_id, Contact.classe_id == 2).order_by(Contact.nom).all()
     elif critere == 'ami':
-        contacts = Contact.query.filter(Contact.user_id == user_id, Contact.classe_id == 3).order_by(desc(Contact.created_at)).all()
+        contacts = Contact.query.filter(Contact.user_id == user_id, Contact.classe_id == 3).order_by(
+            desc(Contact.created_at)).all()
     else:
         flash('Critère de filtrage invalide', 'custom-style')
         return redirect(request.referrer)
@@ -419,29 +393,34 @@ def filtrer_contacts(critere):
     username = user.username if user else "Utilisateur inconnu"
 
     affichage_cartes = request.cookies.get('affichage_cartes') == 'true'
-    return render_template('carnet.html', contacts=contacts, mode_sombre_active=mode_sombre_active, username=username, affichage_cartes=affichage_cartes)
+    return render_template('carnet.html', contacts=contacts,
+                           mode_sombre_active=mode_sombre_active, username=username,
+                           affichage_cartes=affichage_cartes)
 
 
 @app.route('/exporter_contacts')
 def exporter_contacts():
-    contacts = Contact.query.all()
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Vous devez être connecté.', 'error')
+        return redirect(url_for('login'))
 
+    contacts = Contact.query.filter_by(user_id=user_id).all()
     output = StringIO()
     writer = csv.writer(output)
-
     writer.writerow(['Nom', 'Prénom', 'Email', 'Numéro'])
 
     for contact in contacts:
         writer.writerow([contact.nom, contact.prenom, contact.email, contact.numero])
 
     output.seek(0)
-    return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=contacts.csv"})
+    return Response(output, mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment;filename=contacts.csv"})
 
 
 @app.route('/importer_contacts', methods=['POST'])
 def importer_contacts():
     user_id = session.get('user_id')
-
     if user_id is None:
         flash('Vous devez être connecté pour importer des contacts.', 'error')
         return redirect(url_for('carnet'))
@@ -451,7 +430,6 @@ def importer_contacts():
         return redirect(url_for('carnet'))
 
     fichier = request.files['fichier_csv']
-
     if fichier.filename == '':
         flash('Aucun fichier sélectionné.', 'custom-style')
         return redirect(url_for('carnet'))
@@ -459,45 +437,34 @@ def importer_contacts():
     if fichier:
         lignes = fichier.stream.read().decode("UTF8").splitlines()
         lecteur = csv.reader(lignes, delimiter=',')
-        next(lecteur, None)
+        next(lecteur, None)  # Skip header
 
         contacts_importes = 0
         contacts_ignores = 0
 
         for ligne in lecteur:
-            if len(ligne) < 4:  # Vérifier que la ligne a suffisamment de colonnes
+            if len(ligne) < 4:
                 contacts_ignores += 1
                 continue
 
-            # Vérification si le contact existe déjà (nom et prénom)
             contact_existant = Contact.query.filter_by(
-                nom=ligne[0],
-                prenom=ligne[1],
-                user_id=user_id
+                nom=ligne[0], prenom=ligne[1], user_id=user_id
             ).first()
 
-            # Vérification si le numéro existe déjà
             numero_existant = Contact.query.filter_by(
-                numero=ligne[3],
-                user_id=user_id
+                numero=ligne[3], user_id=user_id
             ).first()
 
             if not contact_existant and not numero_existant:
-                # Déterminer la classe (par défaut: famille)
-                classe_id = 1
-                # Si un 5e champ existe, essayer de l'utiliser comme classe
+                classe_id = 1  # famille par défaut
                 if len(ligne) > 4 and ligne[4]:
                     classe = Classe.query.filter_by(nom=ligne[4].lower()).first()
                     if classe:
                         classe_id = classe.id
 
                 nouveau_contact = Contact(
-                    nom=ligne[0],
-                    prenom=ligne[1],
-                    email=ligne[2],
-                    numero=ligne[3],
-                    user_id=user_id,
-                    classe_id=classe_id
+                    nom=ligne[0], prenom=ligne[1], email=ligne[2],
+                    numero=ligne[3], user_id=user_id, classe_id=classe_id
                 )
                 db.session.add(nouveau_contact)
                 contacts_importes += 1
@@ -506,29 +473,25 @@ def importer_contacts():
 
         db.session.commit()
         if contacts_importes > 0:
-            flash(
-                f'Importation réussie : {contacts_importes} contacts importés, {contacts_ignores} ignorés (noms ou numéros déjà existants).',
-                'success')
+            flash(f'Importation réussie : {contacts_importes} contacts importés, {contacts_ignores} ignorés.',
+                  'success')
         else:
-            flash('Aucun nouveau contact importé. Tous les contacts existaient déjà (noms ou numéros identiques).',
-                  'custom-style')
-        return redirect(url_for('carnet'))
-    else:
-        flash('Échec de l\'importation des contacts.', 'custom-style')
-        return redirect(url_for('carnet'))
+            flash('Aucun nouveau contact importé.', 'custom-style')
+
+    return redirect(url_for('carnet'))
+
 
 @app.route('/supprimer_compte', methods=['POST'])
 def supprimer_compte():
     user_id = session.get('user_id')
-
     if user_id is None:
         flash('Vous devez être connecté pour supprimer votre compte.', 'error')
         return redirect(url_for('login'))
 
-    contacts_a_supprimer = Contact.query.filter_by(user_id=user_id).all()
-    for contact in contacts_a_supprimer:
-        db.session.delete(contact)
+    # Supprimer tous les contacts de l'utilisateur
+    Contact.query.filter_by(user_id=user_id).delete()
 
+    # Supprimer l'utilisateur
     user_a_supprimer = User.query.get(user_id)
     if user_a_supprimer:
         db.session.delete(user_a_supprimer)
@@ -540,5 +503,22 @@ def supprimer_compte():
         flash('Utilisateur non trouvé.', 'error')
         return redirect(url_for('index'))
 
+
+@app.route('/health')
+def health_check():
+    """Route de vérification de santé pour le déploiement"""
+    try:
+        # Test de connexion à la base de données
+        db.session.execute('SELECT 1')
+        return {'status': 'healthy', 'database': 'connected'}, 200
+    except Exception as e:
+        return {'status': 'unhealthy', 'error': str(e)}, 500
+
+
+# Initialisation de la base de données
+init_database()
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Pour le développement local uniquement
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
