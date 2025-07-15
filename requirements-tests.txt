@@ -1,5 +1,5 @@
-pytest==7.4.0
-pytest-flask==1.2.0
-pytest-cov==4.1.0
-flask-testing==0.8.1
-factory-boy==3.3.0
+pytest==7.4.0           # Framework de test principal
+pytest-flask==1.2.0     # Extension Flask pour pytest
+pytest-cov==4.1.0       # Couverture de code
+flask-testing==0.8.1    # Outils de test Flask
+factory-boy==3.3.0      # Génération de données de test

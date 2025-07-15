@@ -9,50 +9,82 @@ from flask_bcrypt import Bcrypt
 from flask import request, jsonify
 from datetime import datetime
 import csv
+import os
 
 app = Flask(__name__)
 carnet = CarnetAdresse()
-app.secret_key = "b'_5#y2LF4Q8z\n\xec]/'"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost:3306/addressBook'
+# Configuration selon l'environnement
+config_name = os.environ.get('FLASK_ENV', 'development')
+if config_name == 'production':
+    from config import ProductionConfig
+
+    app.config.from_object(ProductionConfig)
+else:
+    from config import DevelopmentConfig
+
+    app.config.from_object(DevelopmentConfig)
+
+# Configuration de base si pas dans config
+if not app.config.get('SECRET_KEY'):
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "b'_5#y2LF4Q8z\n\xec]/'")
+
+if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///addressbook.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
 
-from models.user import User
-
-
+# Modèles de base de données
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)  # Ajout de l'email
-    phone = db.Column(db.String(20), nullable=False)  # Ajout du téléphone
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class Classe(db.Model):
     __tablename__ = 'classe'
-
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(50), unique=True, nullable=False)
-
     contacts = db.relationship('Contact', backref='classe', lazy=True)
+
 
 class Contact(db.Model):
     __tablename__ = 'contact'
-
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(50), nullable=False)
     prenom = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     numero = db.Column(db.String(20), nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
-    classe_id = db.Column(db.Integer, db.ForeignKey('classe.id'))  # Colonne pour stocker la classe choisie
+    classe_id = db.Column(db.Integer, db.ForeignKey('classe.id'))
     created_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
+# Créer les tables et données initiales
+def create_tables():
+    with app.app_context():
+        db.create_all()
+
+        # Créer les classes par défaut si elles n'existent pas
+        if not Classe.query.first():
+            classes = [
+                Classe(id=1, nom='famille'),
+                Classe(id=2, nom='professionnel'),
+                Classe(id=3, nom='ami')
+            ]
+            for classe in classes:
+                db.session.add(classe)
+            db.session.commit()
 
 #Activation du mode sombre
 
