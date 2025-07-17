@@ -10,6 +10,7 @@ from flask import request, jsonify
 from datetime import datetime
 import csv
 import os
+from config import config
 
 app = Flask(__name__)
 carnet = CarnetAdresse()
@@ -21,8 +22,8 @@ if os.environ.get('FLASK_ENV') == 'production':
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
     app.config['DEBUG'] = False
 else:
-    # Configuration pour le développement local
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///addressbook.db'  # SQLite pour le dev
+    # Configuration pour le développement local avec MySQL
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost:3306/addressBook'
     app.config['SECRET_KEY'] = "b'_5#y2LF4Q8z\n\xec]/'"
     app.config['DEBUG'] = True
 
