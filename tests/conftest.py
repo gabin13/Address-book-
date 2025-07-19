@@ -1,37 +1,91 @@
 import pytest
-import tempfile
 import os
-from app import app, db
-from models.user import User
-from models.contact import Contact
+import sys
+import tempfile
+
+# Ajouter le dossier parent au path pour les imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Patch temporaire pour Werkzeug si nécessaire
+try:
+    import werkzeug
+
+    if not hasattr(werkzeug, '__version__'):
+        # Essayer de récupérer la version autrement
+        try:
+            import pkg_resources
+
+            werkzeug.__version__ = pkg_resources.get_distribution('werkzeug').version
+        except:
+            # Version par défaut si tout échoue
+            werkzeug.__version__ = '2.3.7'
+except:
+    pass
+
 from flask_bcrypt import Bcrypt
 
 bcrypt = Bcrypt()
 
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def client():
-    """Configure le client de test avec une base de données en mémoire"""
-    # Créer un fichier temporaire pour la DB de test
-    db_fd, app.config['DATABASE'] = tempfile.mkstemp()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['WTF_CSRF_ENABLED'] = False
-    app.config['SECRET_KEY'] = 'test-secret-key'
+    """Créer un client de test simple"""
+    # Import tardif pour éviter les problèmes circulaires
+    from app import app, db, Classe
 
-    with app.test_client() as client:
+    # Sauvegarder la config originale
+    original_config = app.config.copy()
+
+    try:
+        # Configuration pour les tests
+        app.config.update({
+            'TESTING': True,
+            'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+            'WTF_CSRF_ENABLED': False,
+            'SECRET_KEY': 'test-secret-key',
+            'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        })
+
+        # Créer le client de test
+        test_client = app.test_client()
+
+        # Setup de la base de données
         with app.app_context():
             db.create_all()
-            yield client
+
+            # NOUVEAU : Créer les classes par défaut
+            classes_default = [
+                {'id': 1, 'nom': 'famille'},
+                {'id': 2, 'nom': 'professionnel'},
+                {'id': 3, 'nom': 'ami'}
+            ]
+
+            for classe_data in classes_default:
+                existing_classe = Classe.query.filter_by(id=classe_data['id']).first()
+                if not existing_classe:
+                    classe = Classe(id=classe_data['id'], nom=classe_data['nom'])
+                    db.session.add(classe)
+
+            db.session.commit()
+            print("✅ Base de données initialisée avec succès")
+
+        yield test_client
+
+        # Cleanup
+        with app.app_context():
+            db.session.remove()
             db.drop_all()
 
-    os.close(db_fd)
-    os.unlink(app.config['DATABASE'])
+    finally:
+        # Restaurer la config originale
+        app.config.update(original_config)
 
 
 @pytest.fixture
 def auth_user(client):
     """Crée un utilisateur de test authentifié"""
+    from app import app, db, User
+
     with app.app_context():
         password_hash = bcrypt.generate_password_hash('password123').decode('utf-8')
         user = User(
@@ -42,6 +96,9 @@ def auth_user(client):
         )
         db.session.add(user)
         db.session.commit()
+
+        # Refresh pour obtenir l'ID
+        db.session.refresh(user)
         return user
 
 
@@ -55,8 +112,10 @@ def logged_in_user(client, auth_user):
 
 
 @pytest.fixture
-def sample_contact(auth_user):
+def sample_contact(client, auth_user):
     """Crée un contact de test"""
+    from app import app, db, Contact
+
     with app.app_context():
         contact = Contact(
             nom='Dupont',
@@ -68,4 +127,6 @@ def sample_contact(auth_user):
         )
         db.session.add(contact)
         db.session.commit()
+
+        db.session.refresh(contact)
         return contact

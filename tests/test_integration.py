@@ -1,7 +1,5 @@
 import pytest
-from app import app, db
-from models.user import User
-from models.contact import Contact
+from app import app, db, User, Contact
 import io
 
 
@@ -56,7 +54,7 @@ class TestIntegration:
 
         # 8. Déconnexion
         response = client.get('/logout')
-        assert response.status_code == 200
+        assert response.status_code == 302  # Redirection après logout
 
         # 9. Vérification perte d'accès
         response = client.get('/carnet')

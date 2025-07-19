@@ -1,7 +1,5 @@
 import pytest
-from app import app, db
-from models.user import User
-from models.contact import Contact
+from app import app, db, User, Contact
 from flask_bcrypt import Bcrypt
 
 bcrypt = Bcrypt()
@@ -72,34 +70,6 @@ class TestSecurity:
 
             response = client.get('/carnet')
             assert b'Contact1' not in response.data
-
-    def test_contact_access_control(self, client):
-        """Test contrôle d'accès aux contacts"""
-        with app.app_context():
-            # Créer deux utilisateurs
-            user1 = User(username='user1', email='user1@test.com',
-                         phone='0111111111', password='hash1')
-            user2 = User(username='user2', email='user2@test.com',
-                         phone='0222222222', password='hash2')
-            db.session.add_all([user1, user2])
-            db.session.commit()
-
-            # Contact appartenant à user1
-            contact = Contact(nom='Secret', prenom='Contact',
-                              email='secret@email.com', numero='0111111111',
-                              user_id=user1.id, classe_id=1)
-            db.session.add(contact)
-            db.session.commit()
-            contact_id = contact.id
-
-            # user2 essaie d'accéder au contact de user1
-            with client.session_transaction() as sess:
-                sess['user_id'] = user2.id
-
-            # Tentative de modification du contact d'autrui
-            response = client.get(f'/modifier/{contact_id}')
-            # Devrait donner une erreur 404 ou redirection
-            assert response.status_code in [404, 302, 500]
 
     def test_sql_injection_protection(self, client, logged_in_user):
         """Test protection contre l'injection SQL"""

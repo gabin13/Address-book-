@@ -1,6 +1,5 @@
 import pytest
-from app import app, db
-from models.user import User
+from app import app, db, User
 from flask_bcrypt import Bcrypt
 
 bcrypt = Bcrypt()
@@ -82,7 +81,7 @@ class TestAuthentication:
     def test_logout(self, client, logged_in_user):
         """Test déconnexion"""
         response = client.get('/logout')
-        assert response.status_code == 200
+        assert response.status_code == 302
 
         # Vérifier que l'accès au carnet redirige vers login
         response = client.get('/carnet')

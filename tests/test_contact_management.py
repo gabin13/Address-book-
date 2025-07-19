@@ -1,6 +1,5 @@
 import pytest
-from app import app, db
-from models.contact import Contact
+from app import app, db, Contact
 
 
 class TestContactManagement:
